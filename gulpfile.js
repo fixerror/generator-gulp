@@ -8,7 +8,7 @@ var bowerFiles = require('main-bower-files');
 var config = require('./gulp.config')();
 
 var useCSS = true;
-var useSCSS =true;
+var useSCSS = true;
 /*===================================================================*/
 /*========START LOG ERROR============================================*/
 /*===================================================================*/
@@ -33,22 +33,22 @@ var log = function (error) {
 var pipes = {};
 
 pipes.builtBootstapDev = function () {
-   /*
-    *  .bootstrap.json ===>
-    *  "main": [
-    *           "dist/css/bootstrap.css",
-    *           "dist/js/bootstrap.js",
-    *           "dist/fonts/**"
-    *          ]
-    *
-    *          ||
-    *
-    *  "main": [
-    *           "dist/css/bootstrap.min.css",
-    *           "dist/js/bootstrap.min.js",
-    *           "dist/fonts/**"
-    *          ]
-    */
+    /*
+     *  .bootstrap.json ===>
+     *  "main": [
+     *           "dist/css/bootstrap.css",
+     *           "dist/js/bootstrap.js",
+     *           "dist/fonts/**"
+     *          ]
+     *
+     *          ||
+     *
+     *  "main": [
+     *           "dist/css/bootstrap.min.css",
+     *           "dist/js/bootstrap.min.js",
+     *           "dist/fonts/**"
+     *          ]
+     */
     return gulp.src('./setting/.bower.json')
         .pipe(gulp.dest('./bower_components/bootstrap/'));
 };
@@ -65,7 +65,7 @@ pipes.validatedAppScripts = function () {
 
 pipes.builtAppScriptsDev = function () {
     return pipes.validatedAppScripts()
-       // .pipe(plugins.ngAnnotate())
+        // .pipe(plugins.ngAnnotate())
         .pipe(plugins.concat('app.js'))
         .pipe(gulp.dest(config.dist.scripts));
 };
@@ -80,7 +80,12 @@ pipes.builtVendorScriptsStyleDev = function () {
             '**/**.woff2'],
         {restore: true});
     return gulp.src(bowerFiles())
-        .pipe(plugins.plumber())
+        .pipe(plugins.plumber({
+            errorHandler: function (error) {
+                console.log(error.message);
+                this.emit('end');
+            }
+        }))
         .pipe(filterJS)
         .pipe(gulp.dest(config.dist.dev + '/bower_components/js'))
         .pipe(filterJS.restore)
@@ -92,31 +97,37 @@ pipes.builtVendorScriptsStyleDev = function () {
         .pipe(filterFonts.restore);
 };
 
-pipes.buildAppStyleCssDev = function(){
-     return gulp.src(config.css.styleCSS)
+pipes.buildAppStyleCssDev = function () {
+    return gulp.src(config.css.styleCSS)
         .pipe(plugins.concat('style.css'))
         .pipe(plugins.uncss({
-            html:[config.clientIndex]
+            html: [config.clientIndex]
         }))
         .pipe(gulp.dest(config.dist.css));
 };
+
+pipes.processedImagesDev = function(){
+    return gulp.src(config.img.imgPath)
+        .pipe(gulp.dest(config.dist.img));
+}
+
 pipes.builtIndexDev = function () {
 
     var filterJSCSS = plugins.filter(['**/*.js', '**/*.css'], {restore: true});
 
     var orderedVenderScripts = pipes.builtVendorScriptsStyleDev()
-            .pipe(pipes.VendorScripts())
-            .pipe(filterJSCSS);
+        .pipe(pipes.VendorScripts())
+        .pipe(filterJSCSS);
 
-    var orderedAppScriptsDev =pipes.builtAppScriptsDev();
+    var orderedAppScriptsDev = pipes.builtAppScriptsDev();
 
-    var orderedAppStyleDev =pipes.buildAppStyleCssDev();
+    var orderedAppStyleDev = pipes.buildAppStyleCssDev();
 
     return gulp.src(config.clientIndex)
         .pipe(gulp.dest(config.dist.dev))
         .pipe(plugins.inject(orderedVenderScripts, {relative: true, name: 'bower'}))
-        .pipe(plugins.inject(orderedAppScriptsDev,{relative: true}))
-        .pipe(plugins.inject(orderedAppStyleDev,{relative: true}))
+        .pipe(plugins.inject(orderedAppScriptsDev, {relative: true}))
+        .pipe(plugins.inject(orderedAppStyleDev, {relative: true}))
         .pipe(gulp.dest(config.dist.dev))
 };
 
@@ -133,6 +144,7 @@ gulp.task('built-setting-bootstap-dev', pipes.builtBootstapDev);
 gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
 gulp.task('built-app-scripts-dev', pipes.builtAppScriptsDev);
 gulp.task('built-app-style-dev', pipes.buildAppStyleCssDev);
+gulp.task('built-img-dev', pipes.processedImagesDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
 
 

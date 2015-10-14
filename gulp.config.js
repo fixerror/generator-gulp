@@ -21,6 +21,9 @@ module.exports = function () {
             styleCSS: path.join(clientApp, '**/*.css'),
             styleSCSS: path.join(clientApp, '**/*.scss')
         },
+        img: {
+            imgPath: path.join(clientApp, '/img/**/*')
+        },
         dist: {
             dev: path.join(root, 'dist.dev'),
             css: path.join(root, 'dist.dev/css'),
@@ -41,7 +44,6 @@ module.exports = function () {
             bowerDirectory: path.join(clientApp, 'bower_components'),
             bowerrc: path.join(root, '.bowerrc'),
             bowerJson: path.join(root, 'bower.json')
-
         }
     };
     return config;
