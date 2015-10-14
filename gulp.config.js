@@ -17,9 +17,10 @@ module.exports = function () {
             scripts: path.join(clientApp, '**/*.js'),
             components: path.join(clientApp, 'components/**/*.js')
         },
-        css: [
-            path.join(clientApp, 'css/**/*.css'),
-        ],
+        css: {
+            styleCSS: path.join(clientApp, '**/*.css'),
+            styleSCSS: path.join(clientApp, '**/*.scss')
+        },
         dist: {
             dev: path.join(root, 'dist.dev'),
             css: path.join(root, 'dist.dev/css'),
