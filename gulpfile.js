@@ -3,9 +3,10 @@
  */
 
 var gulp = require('gulp');
-var plugins = require('gulp-load-plugins')();
+var plugins = require('gulp-load-plugins')({lazy: true});
 var bowerFiles = require('main-bower-files');
 var config = require('./gulp.config')();
+var es = require('event-stream');
 
 var useCSS = true;
 var useSCSS = true;
@@ -106,7 +107,7 @@ pipes.buildAppStyleCssDev = function () {
         .pipe(gulp.dest(config.dist.css));
 };
 
-pipes.processedImagesDev = function(){
+pipes.processedImagesDev = function () {
     return gulp.src(config.img.imgPath)
         .pipe(gulp.dest(config.dist.img));
 }
@@ -131,6 +132,9 @@ pipes.builtIndexDev = function () {
         .pipe(gulp.dest(config.dist.dev))
 };
 
+pipes.builtAppDev = function () {
+    return es.merge(pipes.builtIndexDev(), pipes.processedImagesDev());
+};
 
 /*===================================================================*/
 /*========END PIPE ==================================================*/
@@ -138,7 +142,7 @@ pipes.builtIndexDev = function () {
 
 
 /*===================================================================*/
-/*========START DEV TASK ================================================*/
+/*========START DEV TASK ============================================*/
 /*===================================================================*/
 gulp.task('built-setting-bootstap-dev', pipes.builtBootstapDev);
 gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
@@ -146,8 +150,9 @@ gulp.task('built-app-scripts-dev', pipes.builtAppScriptsDev);
 gulp.task('built-app-style-dev', pipes.buildAppStyleCssDev);
 gulp.task('built-img-dev', pipes.processedImagesDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
+gulp.task('built-app-dev', pipes.builtAppDev);
 
 
 /*===================================================================*/
-/*========END DEV TASK ==================================================*/
+/*========END DEV TASK ==============================================*/
 /*===================================================================*/
