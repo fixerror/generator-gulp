@@ -13,33 +13,33 @@ module.exports = function () {
         client: client,
         clientApp: clientApp,
         clientIndex: path.join(clientApp, 'index.html'),
-        js: [
-            path.join(clientApp, 'js/**/*.js'),
-            path.join(clientApp, 'components/**/*.js')
-        ],
+        js: {
+            scripts: path.join(clientApp, '**/*.js'),
+            components: path.join(clientApp, 'components/**/*.js')
+        },
         css: [
             path.join(clientApp, 'css/**/*.css'),
         ],
         dist: {
-            dev:         path.join(root, 'dist.dev'),
-            css:         path.join(root, 'dist.dev/css'),
-            img:         path.join(root, 'dist.dev/img'),
-            scripts:     path.join(root, 'dist.dev/scripts')
+            dev: path.join(root, 'dist.dev'),
+            css: path.join(root, 'dist.dev/css'),
+            img: path.join(root, 'dist.dev/img'),
+            scripts: path.join(root, 'dist.dev/js')
         },
         prod: {
-            prod:        path.join(root, 'dist.prod'),
-            css:         path.join(root, 'dist.prod/css'),
-            img:         path.join(root, 'dist.prod/img'),
-            scripts:     path.join(root, 'dist.prod/scripts')
+            prod: path.join(root, 'dist.prod'),
+            css: path.join(root, 'dist.prod/css'),
+            img: path.join(root, 'dist.prod/img'),
+            scripts: path.join(root, 'dist.prod/js')
         },
         optimized: {
             app: 'app.js',
             lib: 'lib.js'
         },
-        bowerPath:{
-            bowerDirectory:    path.join(clientApp, 'bower_components'),
-            bowerrc:           path.join(root, '.bowerrc'),
-            bowerJson:         path.join(root, 'bower.json')
+        bowerPath: {
+            bowerDirectory: path.join(clientApp, 'bower_components'),
+            bowerrc: path.join(root, '.bowerrc'),
+            bowerJson: path.join(root, 'bower.json')
 
         }
     };

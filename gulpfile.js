@@ -30,9 +30,7 @@ var log = function (error) {
 /*===================================================================*/
 var pipes = {};
 
-pipes.VendorScripts = function () {
-    return plugins.order(['jquery.js', 'angular.js', 'bootstrap.js']);
-};
+
 
 pipes.builtBootstapDev = function () {
    /*
@@ -54,6 +52,23 @@ pipes.builtBootstapDev = function () {
     return gulp.src('./setting/.bower.json')
         .pipe(gulp.dest('./bower_components/bootstrap/'));
 };
+
+pipes.VendorScripts = function () {
+    return plugins.order(['jquery.js', 'angular.js', 'bootstrap.js']);
+};
+
+pipes.validatedAppScripts = function () {
+    return gulp.src(config.js.scripts)
+        .pipe(plugins.jshint())
+        .pipe(plugins.jshint.reporter('jshint-stylish'));
+};
+pipes.builtAppScriptsDev = function () {
+    return pipes.validatedAppScripts()
+       // .pipe(plugins.ngAnnotate())
+        .pipe(plugins.concat('app.js'))
+        .pipe(gulp.dest(config.dist.scripts));
+};
+
 pipes.builtVendorScriptsStyleDev = function () {
     var filterJS = plugins.filter('**/*.js', {restore: true});
     var filterCSS = plugins.filter('**/*.css', {restore: true});
@@ -77,14 +92,19 @@ pipes.builtVendorScriptsStyleDev = function () {
 };
 
 pipes.builtIndexDev = function () {
+
     var filterJSCSS = plugins.filter(['**/*.js', '**/*.css'], {restore: true});
+
     var orderedVenderScripts = pipes.builtVendorScriptsStyleDev()
             .pipe(pipes.VendorScripts())
             .pipe(filterJSCSS);
 
+    var orderedAppScriptsDev =pipes.builtAppScriptsDev();
+
     return gulp.src(config.clientIndex)
         .pipe(gulp.dest(config.dist.dev))
         .pipe(plugins.inject(orderedVenderScripts, {relative: true, name: 'bower'}))
+        .pipe(plugins.inject(orderedAppScriptsDev,{relative: true}))
         .pipe(gulp.dest(config.dist.dev))
 };
 
@@ -97,8 +117,9 @@ pipes.builtIndexDev = function () {
 /*===================================================================*/
 /*========START DEV TASK ================================================*/
 /*===================================================================*/
-gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
 gulp.task('built-setting-bootstap-dev', pipes.builtBootstapDev);
+gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
+gulp.task('built-app-scripts-dev', pipes.builtAppScriptsDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
 
 
