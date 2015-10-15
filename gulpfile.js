@@ -7,10 +7,11 @@ var plugins = require('gulp-load-plugins')({lazy: true});
 var del = require('del');
 var bowerFiles = require('main-bower-files');
 var config = require('./gulp.config')();
-var bowerSync=require('browser-sync');
+var bowerSync = require('browser-sync');
 var es = require('event-stream');
 var beeper = require('beeper');
 
+var settingsBootstrap = false;
 var useCSS_SCSS = true; //true ===> CSS ; false ===> SCSS
 
 /*===================================================================*/
@@ -20,8 +21,8 @@ var useCSS_SCSS = true; //true ===> CSS ; false ===> SCSS
 function onError(err) {
     beeper();
     console.log(
-        "================START ERROR MESSAGE ==========================="+
-        "[" + err+"]"+
+        "================START ERROR MESSAGE ===========================" +
+        "[" + err + "]" +
         "================END ERROR MESSAGE =============================");
 }
 /*===================================================================*/
@@ -74,7 +75,8 @@ pipes.builtAppScriptsDev = function () {
 pipes.builtVendorScriptsStyleDev = function () {
     var filterJS = plugins.filter('**/*.js', {restore: true});
     var filterCSS = plugins.filter('**/*.css', {restore: true});
-    var filterFonts = plugins.filter(['**/**.eot',
+    var filterFonts = plugins.filter(
+        [   '**/**.eot',
             '**/**.svg',
             '**/**.ttf',
             '**/**.woff',
@@ -82,7 +84,7 @@ pipes.builtVendorScriptsStyleDev = function () {
         {restore: true});
     return gulp.src(bowerFiles())
         .pipe(plugins.plumber({
-            errorHandler: onError
+                errorHandler: onError
             }
         ))
         .pipe(filterJS)
@@ -114,9 +116,9 @@ pipes.processedImagesDev = function () {
         .pipe(gulp.dest(config.dist.img));
 };
 
-pipes.processedPartialsFilesDev = function(){
+pipes.processedPartialsFilesDev = function () {
     return gulp.src(config.partialas)
-        .pipe (gulp.dest(config.dist.partialas));
+        .pipe(gulp.dest(config.dist.dev));
 };
 
 pipes.builtIndexDev = function () {
@@ -151,23 +153,29 @@ pipes.builtAppDev = function () {
 /*========START DEV TASK ============================================*/
 /*===================================================================*/
 gulp.task('built-setting-bootstap-dev', pipes.builtBootstapDev);
+gulp.task('settings', function () {
+    if (settingsBootstrap) {
+        return pipes.builtBootstapDev;
+    }
+    return;
+});
 gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
 gulp.task('built-app-scripts-dev', pipes.builtAppScriptsDev);
 gulp.task('built-app-style-dev', pipes.buildAppStyleCssDev);
 gulp.task('built-img-dev', pipes.processedImagesDev);
-gulp.task('built-partials-dev',pipes.processedPartialsFilesDev);
+gulp.task('built-partials-dev', pipes.processedPartialsFilesDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
 gulp.task('built-app-dev', pipes.builtAppDev);
-gulp.task('clean-dev', function() {
+gulp.task('clean-dev', function () {
     return del(config.dist.dev);
 });
-gulp.task('clean-build-app-dev', ['clean-dev'],pipes.builtAppDev);
+gulp.task('clean-build-app-dev', ['clean-dev'], pipes.builtAppDev);
 
 /*=======================================*/
 /*========START BROWSER-SYNC DEV ========*/
 /*=======================================*/
 
-gulp.task('watch-dev', ['clean-build-app-dev'], function () {
+gulp.task('watch-dev', ['settings', 'clean-build-app-dev'], function () {
     var reload = bowerSync.reload;
     bowerSync({
         port: 8000,
@@ -184,6 +192,12 @@ gulp.task('watch-dev', ['clean-build-app-dev'], function () {
     gulp.watch(config.js.scripts, function () {
         return pipes.builtAppScriptsDev()
             .pipe(reload({stream: true}));
+    });
+    // watch html partials
+    gulp.watch(config.partialas, function () {
+        return pipes.processedPartialsFilesDev()
+            .pipe(reload({stream: true}));
+
     });
 });
 /*=====================================*/
