@@ -4,8 +4,10 @@
 
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')({lazy: true});
+var del = require('del');
 var bowerFiles = require('main-bower-files');
 var config = require('./gulp.config')();
+var bowerSync=require('browser-sync');
 var es = require('event-stream');
 var beeper = require('beeper');
 
@@ -161,6 +163,22 @@ gulp.task('clean-dev', function() {
 });
 gulp.task('clean-build-app-dev', ['clean-dev'],pipes.builtAppDev);
 
+/*=======================================*/
+/*========START BROWSER-SYNC DEV ========*/
+/*=======================================*/
+
+gulp.task('watch-dev', ['clean-build-app-dev'], function () {
+    var reload = bowerSync.reload;
+    bowerSync({
+        port: 8000,
+        server: {
+            baseDir: config.dist.dev
+        }
+    });
+});
+/*=====================================*/
+/*========END BROWSER-SYNC DEV ========*/
+/*=====================================*/
 
 /*===================================================================*/
 /*========END DEV TASK ==============================================*/
