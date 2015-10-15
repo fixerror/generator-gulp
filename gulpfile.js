@@ -116,7 +116,7 @@ pipes.processedImagesDev = function () {
 
 pipes.processedPartialsFilesDev = function(){
     return gulp.src(config.partialas)
-        .pipe (gulp.dest(config.dist.partialas));
+        .pipe (gulp.dest(config.dist.dev));
 };
 
 pipes.builtIndexDev = function () {
@@ -184,6 +184,12 @@ gulp.task('watch-dev', ['clean-build-app-dev'], function () {
     gulp.watch(config.js.scripts, function () {
         return pipes.builtAppScriptsDev()
             .pipe(reload({stream: true}));
+    });
+    // watch html partials
+    gulp.watch(config.partialas, function () {
+        return pipes.processedPartialsFilesDev()
+            .pipe(reload({stream: true}));
+
     });
 });
 /*=====================================*/
