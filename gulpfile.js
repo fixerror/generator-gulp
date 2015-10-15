@@ -180,7 +180,11 @@ gulp.task('watch-dev', ['clean-build-app-dev'], function () {
         return pipes.builtIndexDev()
             .pipe(reload({stream: true}));
     });
-
+    //watch js
+    gulp.watch(config.js.scripts, function () {
+        return pipes.builtAppScriptsDev()
+            .pipe(reload({stream: true}));
+    });
 });
 /*=====================================*/
 /*========END BROWSER-SYNC DEV ========*/
