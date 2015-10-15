@@ -199,6 +199,10 @@ gulp.task('watch-dev', ['settings', 'clean-build-app-dev'], function () {
             .pipe(reload({stream: true}));
 
     });
+    gulp.watch(config.css.styleCSS, function () {
+        return pipes.buildAppStyleCssDev()
+            .pipe(reload({stream: true}));
+    });
 });
 /*=====================================*/
 /*========END BROWSER-SYNC DEV ========*/
