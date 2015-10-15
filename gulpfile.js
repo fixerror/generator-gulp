@@ -8,8 +8,8 @@ var bowerFiles = require('main-bower-files');
 var config = require('./gulp.config')();
 var es = require('event-stream');
 
-var useCSS = true;
-var useSCSS = true;
+var useCSS_SCSS = true; //true ===> CSS ; false ===> SCSS
+
 /*===================================================================*/
 /*========START LOG ERROR============================================*/
 /*===================================================================*/
@@ -110,7 +110,12 @@ pipes.buildAppStyleCssDev = function () {
 pipes.processedImagesDev = function () {
     return gulp.src(config.img.imgPath)
         .pipe(gulp.dest(config.dist.img));
-}
+};
+
+pipes.processedPartialsFilesDev = function(){
+    return gulp.src(config.partialas)
+        .pipe (gulp.dest(config.dist.partialas));
+};
 
 pipes.builtIndexDev = function () {
 
@@ -133,7 +138,7 @@ pipes.builtIndexDev = function () {
 };
 
 pipes.builtAppDev = function () {
-    return es.merge(pipes.builtIndexDev(), pipes.processedImagesDev());
+    return es.merge(pipes.builtIndexDev(), pipes.processedImagesDev(), pipes.processedPartialsFilesDev());
 };
 
 /*===================================================================*/
@@ -149,6 +154,7 @@ gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
 gulp.task('built-app-scripts-dev', pipes.builtAppScriptsDev);
 gulp.task('built-app-style-dev', pipes.buildAppStyleCssDev);
 gulp.task('built-img-dev', pipes.processedImagesDev);
+gulp.task('built-partials-dev',pipes.processedPartialsFilesDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
 gulp.task('built-app-dev', pipes.builtAppDev);
 
