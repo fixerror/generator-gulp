@@ -7,23 +7,21 @@ var plugins = require('gulp-load-plugins')({lazy: true});
 var bowerFiles = require('main-bower-files');
 var config = require('./gulp.config')();
 var es = require('event-stream');
+var beeper = require('beeper');
 
 var useCSS_SCSS = true; //true ===> CSS ; false ===> SCSS
 
 /*===================================================================*/
 /*========START LOG ERROR============================================*/
 /*===================================================================*/
-var log = function (error) {
-    console.log([
-        '',
-        "================START ERROR MESSAGE ===========================",
-        ("[" + error.name + " in " + error.plugin + "]"),
-        error.message,
-        "================END ERROR MESSAGE =============================",
-        ''
-    ].join('\n'));
-};
 
+function onError(err) {
+    beeper();
+    console.log(
+        "================START ERROR MESSAGE ==========================="+
+        "[" + err+"]"+
+        "================END ERROR MESSAGE =============================");
+}
 /*===================================================================*/
 /*========END LOG ERROR==============================================*/
 /*===================================================================*/
@@ -82,11 +80,9 @@ pipes.builtVendorScriptsStyleDev = function () {
         {restore: true});
     return gulp.src(bowerFiles())
         .pipe(plugins.plumber({
-            errorHandler: function (error) {
-                console.log(error.message);
-                this.emit('end');
+            errorHandler: onError
             }
-        }))
+        ))
         .pipe(filterJS)
         .pipe(gulp.dest(config.dist.dev + '/bower_components/js'))
         .pipe(filterJS.restore)
@@ -100,6 +96,10 @@ pipes.builtVendorScriptsStyleDev = function () {
 
 pipes.buildAppStyleCssDev = function () {
     return gulp.src(config.css.styleCSS)
+        .pipe(plugins.plumber({
+                errorHandler: onError
+            }
+        ))
         .pipe(plugins.concat('style.css'))
         .pipe(plugins.uncss({
             html: [config.clientIndex]
@@ -118,19 +118,18 @@ pipes.processedPartialsFilesDev = function(){
 };
 
 pipes.builtIndexDev = function () {
-
     var filterJSCSS = plugins.filter(['**/*.js', '**/*.css'], {restore: true});
-
     var orderedVenderScripts = pipes.builtVendorScriptsStyleDev()
         .pipe(pipes.VendorScripts())
         .pipe(filterJSCSS);
-
     var orderedAppScriptsDev = pipes.builtAppScriptsDev();
-
     var orderedAppStyleDev = pipes.buildAppStyleCssDev();
-
     return gulp.src(config.clientIndex)
         .pipe(gulp.dest(config.dist.dev))
+        .pipe(plugins.plumber({
+                errorHandler: onError
+            }
+        ))
         .pipe(plugins.inject(orderedVenderScripts, {relative: true, name: 'bower'}))
         .pipe(plugins.inject(orderedAppScriptsDev, {relative: true}))
         .pipe(plugins.inject(orderedAppStyleDev, {relative: true}))
@@ -157,6 +156,10 @@ gulp.task('built-img-dev', pipes.processedImagesDev);
 gulp.task('built-partials-dev',pipes.processedPartialsFilesDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
 gulp.task('built-app-dev', pipes.builtAppDev);
+gulp.task('clean-dev', function() {
+    return del(config.dist.dev);
+});
+gulp.task('clean-build-app-dev', ['clean-dev'],pipes.builtAppDev);
 
 
 /*===================================================================*/

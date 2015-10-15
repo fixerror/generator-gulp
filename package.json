@@ -41,5 +41,7 @@
     "jshint-stylish": "^2.0.1",
     "main-bower-files": "^2.9.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "beeper": "^1.1.0"
+  }
 }
