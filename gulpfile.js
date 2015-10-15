@@ -175,6 +175,12 @@ gulp.task('watch-dev', ['clean-build-app-dev'], function () {
             baseDir: config.dist.dev
         }
     });
+    //watch index
+    gulp.watch(config.clientIndex, function () {
+        return pipes.builtIndexDev()
+            .pipe(reload({stream: true}));
+    });
+
 });
 /*=====================================*/
 /*========END BROWSER-SYNC DEV ========*/
