@@ -11,6 +11,7 @@ var bowerSync=require('browser-sync');
 var es = require('event-stream');
 var beeper = require('beeper');
 
+var settingsBootstrap =false;
 var useCSS_SCSS = true; //true ===> CSS ; false ===> SCSS
 
 /*===================================================================*/
@@ -34,6 +35,7 @@ function onError(err) {
 var pipes = {};
 
 pipes.builtBootstapDev = function () {
+    console.log('builtBootstapDev');
     /*
      *  .bootstrap.json ===>
      *  "main": [
@@ -55,16 +57,19 @@ pipes.builtBootstapDev = function () {
 };
 
 pipes.VendorScripts = function () {
+    console.log('VendorScripts');
     return plugins.order(['jquery.js', 'angular.js', 'bootstrap.js']);
 };
 
 pipes.validatedAppScripts = function () {
+    console.log('validatedAppScripts');
     return gulp.src(config.js.scripts)
         .pipe(plugins.jshint())
         .pipe(plugins.jshint.reporter('jshint-stylish'));
 };
 
 pipes.builtAppScriptsDev = function () {
+    console.log('builtAppScriptsDev');
     return pipes.validatedAppScripts()
         // .pipe(plugins.ngAnnotate())
         .pipe(plugins.concat('app.js'))
@@ -72,6 +77,7 @@ pipes.builtAppScriptsDev = function () {
 };
 
 pipes.builtVendorScriptsStyleDev = function () {
+    console.log('builtVendorScriptsStyleDev');
     var filterJS = plugins.filter('**/*.js', {restore: true});
     var filterCSS = plugins.filter('**/*.css', {restore: true});
     var filterFonts = plugins.filter(['**/**.eot',
@@ -97,6 +103,7 @@ pipes.builtVendorScriptsStyleDev = function () {
 };
 
 pipes.buildAppStyleCssDev = function () {
+    console.log('buildAppStyleCssDev');
     return gulp.src(config.css.styleCSS)
         .pipe(plugins.plumber({
                 errorHandler: onError
@@ -110,16 +117,19 @@ pipes.buildAppStyleCssDev = function () {
 };
 
 pipes.processedImagesDev = function () {
+    console.log('processedImagesDev');
     return gulp.src(config.img.imgPath)
         .pipe(gulp.dest(config.dist.img));
 };
 
 pipes.processedPartialsFilesDev = function(){
+    console.log('processedPartialsFilesDev');
     return gulp.src(config.partialas)
         .pipe (gulp.dest(config.dist.dev));
 };
 
 pipes.builtIndexDev = function () {
+    console.log('builtIndexDev');
     var filterJSCSS = plugins.filter(['**/*.js', '**/*.css'], {restore: true});
     var orderedVenderScripts = pipes.builtVendorScriptsStyleDev()
         .pipe(pipes.VendorScripts())
@@ -139,6 +149,7 @@ pipes.builtIndexDev = function () {
 };
 
 pipes.builtAppDev = function () {
+    console.log('builtAppDev');
     return es.merge(pipes.builtIndexDev(), pipes.processedImagesDev(), pipes.processedPartialsFilesDev());
 };
 
@@ -151,6 +162,12 @@ pipes.builtAppDev = function () {
 /*========START DEV TASK ============================================*/
 /*===================================================================*/
 gulp.task('built-setting-bootstap-dev', pipes.builtBootstapDev);
+gulp.task('settings', function(){
+    console.log('settings');
+    if(settingsBootstrap){ console.log(settingsBootstrap); return pipes.builtBootstapDev;}
+    console.log(settingsBootstrap)
+    return;
+});
 gulp.task('built-vendor-dev', pipes.builtVendorScriptsStyleDev);
 gulp.task('built-app-scripts-dev', pipes.builtAppScriptsDev);
 gulp.task('built-app-style-dev', pipes.buildAppStyleCssDev);
@@ -159,6 +176,7 @@ gulp.task('built-partials-dev',pipes.processedPartialsFilesDev);
 gulp.task('built-index-dev', pipes.builtIndexDev);
 gulp.task('built-app-dev', pipes.builtAppDev);
 gulp.task('clean-dev', function() {
+    console.log('clean-dev');
     return del(config.dist.dev);
 });
 gulp.task('clean-build-app-dev', ['clean-dev'],pipes.builtAppDev);
@@ -167,7 +185,8 @@ gulp.task('clean-build-app-dev', ['clean-dev'],pipes.builtAppDev);
 /*========START BROWSER-SYNC DEV ========*/
 /*=======================================*/
 
-gulp.task('watch-dev', ['clean-build-app-dev'], function () {
+gulp.task('watch-dev', ['settings','clean-build-app-dev'], function () {
+    console.log('watch-dev');
     var reload = bowerSync.reload;
     bowerSync({
         port: 8000,
@@ -177,16 +196,19 @@ gulp.task('watch-dev', ['clean-build-app-dev'], function () {
     });
     //watch index
     gulp.watch(config.clientIndex, function () {
+        console.log('watch index');
         return pipes.builtIndexDev()
             .pipe(reload({stream: true}));
     });
     //watch js
     gulp.watch(config.js.scripts, function () {
+        console.log('watch js');
         return pipes.builtAppScriptsDev()
             .pipe(reload({stream: true}));
     });
     // watch html partials
     gulp.watch(config.partialas, function () {
+        console.log('watch html partials');
         return pipes.processedPartialsFilesDev()
             .pipe(reload({stream: true}));
 
